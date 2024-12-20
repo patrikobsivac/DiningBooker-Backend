@@ -1,16 +1,16 @@
-import express from 'express';
-import cors from 'cors';
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
-const router = express.Router();
-app.use('/api', router);
-app.use(express.json());
 app.use(cors());
+app.use(bodyParser.json());
 
 let tasks = [
   {
     id: 1,
-    text: 'Vuetify',
+    text: 'Vue.js',
     done: false,
   },
   {
@@ -48,6 +48,12 @@ app.put('/api/tasks/:id', (req, res) => {
 app.delete('/api/tasks/:id', (req, res) => {
   tasks = tasks.filter((t) => t.id !== parseInt(req.params.id));
   res.json({ success: true });
+});
+
+const frontendPath = path.join(__dirname, 'dist');
+app.use(express.static(frontendPath));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 const PORT = process.env.port || 3000;
