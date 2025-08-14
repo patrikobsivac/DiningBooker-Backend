@@ -1,4 +1,4 @@
-import { guests as guestData } from "../Models/customerModel.js";
+import { guests as guestData } from "../Handlers/guestHandler.js";
 
 const fetchGuestById = (id) => guestData.find(guests => guests.id === id);
 const fetchAllGuests = () => [...guestData];
