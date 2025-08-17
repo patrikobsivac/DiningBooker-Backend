@@ -1,32 +1,74 @@
 import db from "../src/db.js";
 
-const menuCollection = db.collection("Menu");
+const Menu = db.collection("Menu");
 
-export const getAllMenu = async (req, res) => {
+export const fetchAllMenus = async (req, res) => {
   try {
-    const menu = await menuCollection.find().toArray();
-    res.json(menu);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const allMenus = await Menu.find({}).toArray();
+    return res.status(200).json(allMenus);
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod dohvaćanja menija: " + err.message });
   }
 };
 
-export const getMenuByID = async (req, res) => {
-  const menuID = req.params.id;
+export const fetchMenuById = async (req, res) => {
+  const { id } = req.params;
   try {
-    const menu = await menuCollection.findOne({ id: menuID });
-    if (!menu) {
-      res.status(404).json({ message: "Odabrani jelovnik nije pronađen." });
+    const foundMenu = await Menu.findOne({ id });
+    if (!foundMenu) {
+      return res.status(404).json({ message: "Meni s traženim ID-em ne postoji." });
     }
-    res.json(menu);
-  } catch (error) {
-    if (!res.headersSent) {
-      res.status(500).json({ error: error.message });
-    }
+    return res.json(foundMenu);
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod dohvaćanja: " + err.message });
   }
 };
 
-export const menuMethods = {
-  getAllMenu,
-  getMenuByID
+export const createMenu = async (req, res) => {
+  const { id, nazivMenua } = req.body;
+
+  if (!id || !nazivMenua) {
+    return res.status(400).json({ message: "Potrebno je unijeti ID i naziv menija." });
+  }
+
+  try {
+    const insertResult = await Menu.insertOne({ id, nazivMenua });
+    return res.status(201).json({
+      message: "Novi meni je kreiran.",
+      insertedId: insertResult.insertedId,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod unosa: " + err.message });
+  }
+};
+
+export const removeMenu = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleteResult = await Menu.deleteOne({ id });
+    if (deleteResult.deletedCount === 0) {
+      return res.status(404).json({ message: "Nije pronađen meni za brisanje." });
+    }
+    return res.json({ message: "Meni uspješno uklonjen." });
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod brisanja: " + err.message });
+  }
+};
+
+export const fetchMenusByCategory = async (req, res) => {
+  try {
+    const filter = req.query.category ? { category: req.query.category } : {};
+    const filteredMenus = await Menu.find(filter).toArray();
+    return res.json(filteredMenus);
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod filtriranja: " + err.message });
+  }
+};
+
+export const menuController = {
+  fetchAllMenus,
+  fetchMenuById,
+  createMenu,
+  removeMenu,
+  fetchMenusByCategory,
 };
