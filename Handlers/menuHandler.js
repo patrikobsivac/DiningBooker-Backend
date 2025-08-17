@@ -65,7 +65,7 @@ export const fetchMenusByCategory = async (req, res) => {
   }
 };
 
-export const menuController = {
+export const menuMethods = {
   fetchAllMenus,
   fetchMenuById,
   createMenu,
