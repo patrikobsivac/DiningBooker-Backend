@@ -1,4 +1,4 @@
-import { mongo, ObjectId } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import db from "./db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -47,5 +47,14 @@ export default {
       expiresIn: "7d",
     });
     return { token, email: user.email };
+  },
+    async updatePassword(email, newPass) {
+    const existing = await collection.findOne({ email });
+    if (!existing) {
+      throw new Error("Gost nije pronađen.");
+    }
+    const hashed = await bcrypt.hash(newPass, 10);
+    await collection.updateOne({ email }, { $set: { password: hashed } });
+    return { success: true, email };
   },
 };
