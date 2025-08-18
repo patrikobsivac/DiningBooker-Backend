@@ -7,7 +7,7 @@ const createGuest = (guests) => {
     return [...guestData];
 };
 
-export const guestService = {
+export const guestMethods = {
     fetchGuestById,
     fetchAllGuests,
     createGuest

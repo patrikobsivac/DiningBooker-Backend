@@ -73,7 +73,7 @@ export async function removeBooking(req, res) {
   }
 }
 
-export const rezervacijaService = {
+export const bookingMethods = {
   fetchAllBooking,
   fetchBookingById,
   fetchBookingByGost,
