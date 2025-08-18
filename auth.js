@@ -40,7 +40,6 @@ export default {
     if (!isValid) {
       throw new Error("Neispravni su podaci za prijavu.");
     }
-
     const payload = { id: user._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET || "default_secret", {
       algorithm: "HS256",
@@ -48,6 +47,7 @@ export default {
     });
     return { token, email: user.email };
   },
+
     async updatePassword(email, newPass) {
     const existing = await collection.findOne({ email });
     if (!existing) {
@@ -56,5 +56,20 @@ export default {
     const hashed = await bcrypt.hash(newPass, 10);
     await collection.updateOne({ email }, { $set: { password: hashed } });
     return { success: true, email };
+  },
+
+  authMiddleware(req, res, next) {
+    try {
+      const authHeader = req.headers.authorization || "";
+      const [scheme, token] = authHeader.split(" ");
+
+      if (scheme !== "Bearer" || !token) {
+        return res.status(401).send("Unauthorized");
+      }
+      req.jwt = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+      return next();
+    } catch (err) {
+      return res.status(403).send("Forbidden");
+    }
   },
 };
