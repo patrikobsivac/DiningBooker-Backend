@@ -1,10 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { guestService } from "../Handlers/guestHandler.js";
-import { rateMethods } from "../Handlers/ratingHandler.js";
-import { menuMethods } from "../Handlers/menuHandler.js";
-import { bookingService } from "../Handlers/bookingHandler.js";
+import { guestMethods } from "./guestHandler.js";
+import { menuMethods } from "./menuHandler.js";
+import { bookingService } from "./bookingHandler.js";
+import { rateMethods } from "./ratingHandler.js";
+
 const app = express();
 const router = express.Router();
 const PORT = process.env.PORT || 3000;
@@ -33,13 +34,22 @@ router.post("/guests", (req, res) => {
   res.status(201).json(allGuests);
 });
 
-
-app.listen(port, () => {
-    console.log(`Servis sluša na portu ${PORT}`);
-});
-
 router.get("/menus", menuMethods.fetchAllMenus);
 router.get("/menus/:id", menuMethods.fetchMenuById);
 router.post("/menus", menuMethods.createMenu);
 router.delete("/menus/:id", menuMethods.removeMenu);
 router.get("/menus/filter/category", menuMethods.fetchMenusByCategory);
+
+router.get("/bookings", bookingService.fetchAllBookings);
+router.get("/bookings/:id", bookingService.fetchBookingById);
+router.post("/bookings", bookingService.createBooking);
+router.delete("/bookings/:id", bookingService.removeBooking);
+
+router.get("/ratings", rateMethods.fetchAllRatings);
+router.get("/ratings/:id", rateMethods.fetchRatingById);
+router.post("/ratings", rateMethods.createRating);
+router.delete("/ratings/:id", rateMethods.removeRating);
+
+app.listen(PORT, () => {
+  console.log(`Servis sluša na portu ${PORT}`);
+});
