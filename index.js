@@ -40,10 +40,11 @@ router.post("/menus", menuMethods.createMenu);
 router.delete("/menus/:id", menuMethods.removeMenu);
 router.get("/menus/filter/category", menuMethods.fetchMenusByCategory);
 
-router.get("/bookings", bookingService.fetchAllBookings);
-router.get("/bookings/:id", bookingService.fetchBookingById);
-router.post("/bookings", bookingService.createBooking);
-router.delete("/bookings/:id", bookingService.removeBooking);
+router.get("/bookings", bookingMethods.fetchAllBooking);
+router.get("/bookings/:id", bookingMethods.fetchBookingById);
+router.get("/bookings/guest/:id", bookingMethods.fetchBookingByGost);
+router.post("/bookings", bookingMethods.createBooking);
+router.delete("/bookings/:id", bookingMethods.removeBooking);
 
 router.get("/ratings", rateMethods.fetchAllRatings);
 router.get("/ratings/:id", rateMethods.fetchRatingById);
