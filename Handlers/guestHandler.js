@@ -1,14 +1,88 @@
-import { guests as guestData } from "../Handlers/guestHandler.js";
+import db from "../src/db.js";
+import { ObjectId } from "mongodb";
 
-const fetchGuestById = (id) => guestData.find(guests => guests.id === id);
-const fetchAllGuests = () => [...guestData];
-const createGuest = (guests) => {
-    guestData.push(guests);
-    return [...guestData];
-};
+const collection = db.collection("Gosti");
+
+export async function fetchGuests(req, res) {
+  try {
+    const result = await collection.find({}).toArray();
+    return res.status(200).json({ count: result.length, data: result });
+  } catch (err) {
+    return res.status(500).json({ error: "Neuspjelo dohvaćanje gostiju: " + err.message });
+  }
+}
+
+export async function fetchGuestById(req, res) {
+  try {
+    const { id } = req.params;
+    const guest = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!guest) {
+      return res.status(404).json({ message: "Gost s tim ID-em ne postoji." });
+    }
+    return res.status(200).json(guest);
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod traženja gosta: " + err.message });
+  }
+}
+
+export async function fetchGuestByEmail(req, res) {
+  try {
+    const { email } = req.params;
+    const guest = await collection.findOne({ email });
+
+    if (!guest) {
+      return res.status(404).json({ message: "Gost s tim emailom nije pronađen." });
+    }
+    return res.status(200).json(guest);
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod traženja gosta po emailu: " + err.message });
+  }
+}
+
+export async function addGuest(req, res) {
+  const { ime, prezime, godiste, brojTelefona } = req.body;
+
+  if (!ime || !prezime) {
+    return res.status(400).json({ message: "Ime i prezime su obavezni." });
+  }
+
+  try {
+    const insertResult = await collection.insertOne({
+      ime,
+      prezime,
+      godiste: godiste || null,
+      brojTelefona: brojTelefona || "",
+    });
+
+    return res.status(201).json({
+      message: "Gost je dodan u bazu.",
+      newId: insertResult.insertedId,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod dodavanja gosta: " + err.message });
+  }
+}
+
+export async function removeGuest(req, res) {
+  try {
+    const { id } = req.params;
+    const deleteResult = await collection.deleteOne({ _id: new ObjectId(id) });
+
+    if (deleteResult.deletedCount === 0) {
+      return res.status(404).json({ message: "Gost nije pronađen za brisanje." });
+    }
+
+    return res.status(200).json({ message: "Gost je obrisan iz baze." });
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod brisanja gosta: " + err.message });
+  }
+}
 
 export const guestMethods = {
-    fetchGuestById,
-    fetchAllGuests,
-    createGuest
+  fetchGuests,
+  fetchGuestById,
+  fetchGuestByEmail,
+  addGuest,
+  removeGuest,
 };

@@ -1,4 +1,5 @@
 import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
 const connectionString = "";
 const client = new MongoClient(connectionString);
 let conn = null;
