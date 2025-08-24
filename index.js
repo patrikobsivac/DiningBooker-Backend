@@ -80,6 +80,10 @@ router.get("/ratings/:id", rateMethods.fetchRatingById);
 router.post("/ratings", rateMethods.createRating);
 router.delete("/ratings/:id", rateMethods.removeRating);
 
+app.get("/", (req, res) => {
+  res.send("");
+});
+
 app.use("/api", router);
 app.listen(PORT, () => {
   console.log(`Servis sluša na portu ${PORT}`);
