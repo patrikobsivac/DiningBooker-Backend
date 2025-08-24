@@ -1,10 +1,14 @@
 import { ObjectId } from "mongodb";
-import db from "../src/db.js";
+import { connectToDatabase } from "../src/db.js";
 
-const Ocjene = db.collection("Ocjena");
+async function getRatingCollection() {
+  const db = await connectToDatabase();
+  return db.collection("Ocjena");
+}
 
 export const fetchAllRatings = async (req, res) => {
   try {
+    const Ocjene = await getRatingCollection();
     const allRatings = await Ocjene.find({}).toArray();
     return res.status(200).json(allRatings);
   } catch (err) {
@@ -15,6 +19,7 @@ export const fetchAllRatings = async (req, res) => {
 export const fetchRatingById = async (req, res) => {
   const { id } = req.params;
   try {
+    const Ocjene = await getRatingCollection();
     const rating = await Ocjene.findOne({ _id: new ObjectId(id) });
     if (!rating) {
       return res.status(404).json({ message: "Ocjena s tim ID-em ne postoji." });
@@ -33,6 +38,7 @@ export const createRating = async (req, res) => {
   }
 
   try {
+    const Ocjene = await getRatingCollection();
     const insertResult = await Ocjene.insertOne({
       gostId,
       ocjena,
@@ -50,6 +56,7 @@ export const createRating = async (req, res) => {
 export const removeRating = async (req, res) => {
   const { id } = req.params;
   try {
+    const Ocjene = await getRatingCollection();
     const deleteResult = await Ocjene.deleteOne({ _id: new ObjectId(id) });
     if (deleteResult.deletedCount === 0) {
       return res.status(404).json({ message: "Ocjena nije pronađena." });

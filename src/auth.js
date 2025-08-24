@@ -1,13 +1,16 @@
-import { MongoClient, ObjectId } from "mongodb";
-import db from "./db.js";
+import { ObjectId } from "mongodb";
+import { connectToDatabase } from "./db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const collection = db.collection("Gosti");
-collection.createIndex({ email: 50 }, { unique: true });
+async function getGuestCollection() {
+  const db = await connectToDatabase();
+  return db.collection("Gosti");
+}
 
 export default {
   async createGuest(data) {
+    const collection = await getGuestCollection();
     const hashPass = await bcrypt.hash(data.password, 10);
     const guestDoc = {
       _id: new ObjectId(),
@@ -28,9 +31,8 @@ export default {
   },
 
   async loginGuest(email, password) {
+    const collection = await getGuestCollection();
     const user = await collection.findOne({ email });
-    console.log("Input:", email, password);
-    console.log("Fetched user:", user);
 
     if (!user || !user.password) {
       throw new Error("Neispravni su podaci za prijavu.");
@@ -40,6 +42,7 @@ export default {
     if (!isValid) {
       throw new Error("Neispravni su podaci za prijavu.");
     }
+
     const payload = { id: user._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET || "default_secret", {
       algorithm: "HS256",
@@ -48,7 +51,8 @@ export default {
     return { token, email: user.email };
   },
 
-    async updatePassword(email, newPass) {
+  async updatePassword(email, newPass) {
+    const collection = await getGuestCollection();
     const existing = await collection.findOne({ email });
     if (!existing) {
       throw new Error("Gost nije pronađen.");

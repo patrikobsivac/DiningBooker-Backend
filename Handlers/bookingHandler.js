@@ -1,10 +1,15 @@
+import { connectToDatabase } from "../src/db.js";
 import { ObjectId } from "mongodb";
-import db from "../src/db.js";
 
-const collection = db.collection("Rezervacija");
+
+async function getBookingCollection() {
+  const db = await connectToDatabase();
+  return db.collection("Rezervacija");
+}
 
 export async function fetchAllBooking(req, res) {
   try {
+    const collection = await getBookingCollection();
     const allBooking = await collection.find({}).toArray();
     return res.status(200).json(allBooking);
   } catch (err) {
@@ -15,6 +20,7 @@ export async function fetchAllBooking(req, res) {
 export async function fetchBookingById(req, res) {
   const { id } = req.params;
   try {
+    const collection = await getBookingCollection();
     const booking = await collection.findOne({ _id: new ObjectId(id) });
     if (!booking) {
       return res.status(404).json({ message: "Rezervacija s tim ID-om ne postoji." });
@@ -28,6 +34,7 @@ export async function fetchBookingById(req, res) {
 export async function fetchBookingByGost(req, res) {
   const { id: gostId } = req.params;
   try {
+    const collection = await getBookingCollection();
     const bookings = await collection.find({ gostId }).toArray();
     if (bookings.length === 0) {
       return res.status(404).json({ message: "Nisu pronađene rezervacije za odabranog gosta." });
@@ -46,6 +53,7 @@ export async function createBooking(req, res) {
   }
 
   try {
+    const collection = await getBookingCollection();
     const insertResult = await collection.insertOne({
       gostId,
       datum,
@@ -65,6 +73,7 @@ export async function createBooking(req, res) {
 export async function removeBooking(req, res) {
   const { id } = req.params;
   try {
+    const collection = await getBookingCollection();
     const deleteResult = await collection.deleteOne({ _id: new ObjectId(id) });
     if (deleteResult.deletedCount === 0) {
       return res.status(404).json({ message: "Rezervacija nije pronađena." });

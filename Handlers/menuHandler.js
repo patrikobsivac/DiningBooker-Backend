@@ -1,9 +1,14 @@
-import db from "../src/db.js";
+import { connectToDatabase } from "../src/db.js";
 
-const Menu = db.collection("Menu");
+
+async function getMenuCollection() {
+  const db = await connectToDatabase();
+  return db.collection("Menu");
+}
 
 export const fetchAllMenus = async (req, res) => {
   try {
+    const Menu = await getMenuCollection();
     const allMenus = await Menu.find({}).toArray();
     return res.status(200).json(allMenus);
   } catch (err) {
@@ -14,6 +19,7 @@ export const fetchAllMenus = async (req, res) => {
 export const fetchMenuById = async (req, res) => {
   const { id } = req.params;
   try {
+    const Menu = await getMenuCollection();
     const foundMenu = await Menu.findOne({ id });
     if (!foundMenu) {
       return res.status(404).json({ message: "Meni s traženim ID-em ne postoji." });
@@ -32,6 +38,7 @@ export const createMenu = async (req, res) => {
   }
 
   try {
+    const Menu = await getMenuCollection();
     const insertResult = await Menu.insertOne({ id, nazivMenua });
     return res.status(201).json({
       message: "Novi meni je kreiran.",
@@ -45,6 +52,7 @@ export const createMenu = async (req, res) => {
 export const removeMenu = async (req, res) => {
   const { id } = req.params;
   try {
+    const Menu = await getMenuCollection();
     const deleteResult = await Menu.deleteOne({ id });
     if (deleteResult.deletedCount === 0) {
       return res.status(404).json({ message: "Nije pronađen meni za brisanje." });
@@ -57,6 +65,7 @@ export const removeMenu = async (req, res) => {
 
 export const fetchMenusByCategory = async (req, res) => {
   try {
+    const Menu = await getMenuCollection();
     const filter = req.query.category ? { category: req.query.category } : {};
     const filteredMenus = await Menu.find(filter).toArray();
     return res.json(filteredMenus);

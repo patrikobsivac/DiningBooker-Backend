@@ -1,10 +1,15 @@
-import db from "../src/db.js";
+import { connectToDatabase } from "../src/db.js";
 import { ObjectId } from "mongodb";
 
-const collection = db.collection("Gosti");
+
+async function getCollection() {
+  const db = await connectToDatabase();
+  return db.collection("Gosti");
+}
 
 export async function fetchGuests(req, res) {
   try {
+    const collection = await getCollection();
     const result = await collection.find({}).toArray();
     return res.status(200).json({ count: result.length, data: result });
   } catch (err) {
@@ -14,6 +19,7 @@ export async function fetchGuests(req, res) {
 
 export async function fetchGuestById(req, res) {
   try {
+    const collection = await getCollection();
     const { id } = req.params;
     const guest = await collection.findOne({ _id: new ObjectId(id) });
 
@@ -28,6 +34,7 @@ export async function fetchGuestById(req, res) {
 
 export async function fetchGuestByEmail(req, res) {
   try {
+    const collection = await getCollection();
     const { email } = req.params;
     const guest = await collection.findOne({ email });
 
@@ -48,6 +55,7 @@ export async function addGuest(req, res) {
   }
 
   try {
+    const collection = await getCollection();
     const insertResult = await collection.insertOne({
       ime,
       prezime,
@@ -66,6 +74,7 @@ export async function addGuest(req, res) {
 
 export async function removeGuest(req, res) {
   try {
+    const collection = await getCollection();
     const { id } = req.params;
     const deleteResult = await collection.deleteOne({ _id: new ObjectId(id) });
 

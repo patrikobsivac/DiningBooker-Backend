@@ -1,15 +1,33 @@
 import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
-const connectionString = "";
-const client = new MongoClient(connectionString);
-let conn = null;
 
-try {
-  console.log("Trying to establish connection...");
-  conn = await client.connect();
-} catch (e) {
-  console.error(e);
+dotenv.config();
+
+const mongoURI = process.env.MONGO_URI;
+const dbName = process.env.DB_NAME || "DiningBooker";
+
+if (!mongoURI) {
+  throw new Error("MONGO_URI nije definiran!");
 }
-let db = conn.db("Diningbooker");
+
+let db = null;
+
+export const connectToDatabase = async () => {
+  if (db) return db;
+
+  try {
+    const client = new MongoClient(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await client.connect();
+    db = client.db(dbName);
+    console.log(`Connected to database "${dbName}"`);
+    return db;
+  } catch (e) {
+    console.error("Database connection error:", e);
+    throw e;
+  }
+};
 
 export default db;
