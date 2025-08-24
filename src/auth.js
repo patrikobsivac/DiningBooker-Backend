@@ -9,15 +9,16 @@ async function getGuestCollection() {
 }
 
 export default {
+  getGuestCollection, 
   async createGuest(data) {
     const collection = await getGuestCollection();
     const hashPass = await bcrypt.hash(data.password, 10);
     const guestDoc = {
       _id: new ObjectId(),
-      firstName: data.firstName,
-      lastName: data.lastName,
+      firstName: data.firstName || "",
+      lastName: data.lastName || "",
       email: data.email,
-      phoneNumber: data.phoneNumber,
+      phoneNumber: data.phoneNumber || "",
       password: hashPass,
     };
     try {
