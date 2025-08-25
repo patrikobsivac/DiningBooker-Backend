@@ -18,18 +18,12 @@ export async function fetchAllBooking(req, res) {
 
 export async function fetchBookingById(req, res) {
   const { id } = req.params;
-
-  if (!ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Neispravan ID format." });
-  }
+  if (!ObjectId.isValid(id)) return res.status(400).json({ message: "Neispravan ID format." });
 
   try {
     const collection = await getBookingCollection();
     const booking = await collection.findOne({ _id: new ObjectId(id) });
-
-    if (!booking) {
-      return res.status(404).json({ message: "Rezervacija s tim ID-om ne postoji." });
-    }
+    if (!booking) return res.status(404).json({ message: "Rezervacija s tim ID-om ne postoji." });
 
     return res.status(200).json(booking);
   } catch (err) {
@@ -38,31 +32,35 @@ export async function fetchBookingById(req, res) {
 }
 
 export async function fetchBookingByGost(req, res) {
-  const { id: gostId } = req.params;
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ message: "Neispravan ID gosta." });
 
   try {
     const collection = await getBookingCollection();
-    const bookings = await collection.find({ gostId }).toArray();
+    const bookings = await collection.find({ gostId: id }).toArray();
     return res.status(200).json(bookings);
   } catch (err) {
-    return res.status(500).json({ error: "Greška kod dohvaćanja rezervacija gosta: " + err.message });
+    return res.status(500).json({ error: "Greška kod dohvaćanja rezervacija: " + err.message });
   }
 }
 
 export async function createBooking(req, res) {
-  const { gostId, datum, vrijeme, brojStolova, napomena } = req.body;
+  const { gostId, ime, prezime, email, telefon, datum, brojGostiju, napomena } = req.body;
 
-  if (!gostId || !datum || !vrijeme || !brojStolova) {
-    return res.status(400).json({ message: "Potrebno je unijeti gostId, datum, vrijeme i broj stolova." });
+  if (!gostId || !ime || !prezime || !email || !telefon || !datum || !brojGostiju) {
+    return res.status(400).json({ message: "Svi obavezni podaci moraju biti uneseni." });
   }
 
   try {
     const collection = await getBookingCollection();
     const insertResult = await collection.insertOne({
       gostId,
+      ime,
+      prezime,
+      email,
+      telefon,
       datum,
-      vrijeme,
-      brojStolova,
+      brojGostiju,
       napomena: napomena || "",
     });
 
@@ -77,18 +75,12 @@ export async function createBooking(req, res) {
 
 export async function removeBooking(req, res) {
   const { id } = req.params;
-
-  if (!ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Neispravan ID format." });
-  }
+  if (!ObjectId.isValid(id)) return res.status(400).json({ message: "Neispravan ID format." });
 
   try {
     const collection = await getBookingCollection();
     const deleteResult = await collection.deleteOne({ _id: new ObjectId(id) });
-
-    if (deleteResult.deletedCount === 0) {
-      return res.status(404).json({ message: "Rezervacija nije pronađena." });
-    }
+    if (deleteResult.deletedCount === 0) return res.status(404).json({ message: "Rezervacija nije pronađena." });
 
     return res.status(200).json({ message: "Rezervacija je obrisana." });
   } catch (err) {

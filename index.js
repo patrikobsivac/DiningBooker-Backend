@@ -23,15 +23,16 @@ app.post("/register", async (req, res) => {
   const { firstName, lastName, email, password, phoneNumber } = req.body;
 
   if (!email || !password) 
-    return res.status(400).json({ error: "Email i lozinka su obavezni." });
+    return res.status(400).json({ message: "Email i lozinka su obavezni." });
 
   if (password.length < 4) 
-    return res.status(400).json({ error: "Lozinka mora biti minimalno 4 znaka." });
+    return res.status(400).json({ message: "Lozinka mora biti minimalno 4 znaka." });
 
   try {
     const collection = await auth.getGuestCollection(); 
     const existing = await collection.findOne({ email });
-    if (existing) return res.status(409).json({ error: "Korisnik s ovim emailom već postoji." });
+    if (existing) 
+      return res.status(409).json({ message: "Korisnik s ovim emailom već postoji." });
 
     const hashPass = await bcrypt.hash(password, 10);
     const newGuest = {
@@ -52,7 +53,7 @@ app.post("/register", async (req, res) => {
     const { password: _, ...guestWithoutPassword } = newGuest;
     return res.status(201).json({ guest: guestWithoutPassword, token });
   } catch (err) {
-    return res.status(500).json({ error: "Greška na serveru: " + err.message });
+    return res.status(500).json({ message: "Greška na serveru: " + err.message });
   }
 });
 
@@ -60,15 +61,17 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
-    return res.status(400).json({ error: "Email i lozinka su obavezni." });
+    return res.status(400).json({ message: "Email i lozinka su obavezni." });
 
   try {
     const collection = await auth.getGuestCollection();
     const user = await collection.findOne({ email });
-    if (!user) return res.status(403).json({ error: "Neispravni podaci za prijavu." });
+    if (!user) 
+      return res.status(403).json({ message: "Neispravni podaci za prijavu." });
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(403).json({ error: "Neispravni podaci za prijavu." });
+    if (!valid) 
+      return res.status(403).json({ message: "Neispravni podaci za prijavu." });
 
     const token = jwt.sign(
       { id: user._id },
@@ -79,19 +82,20 @@ app.post("/login", async (req, res) => {
     const { password: _, ...userWithoutPassword } = user;
     return res.status(200).json({ user: userWithoutPassword, token });
   } catch (err) {
-    return res.status(500).json({ error: "Greška na serveru: " + err.message });
+    return res.status(500).json({ message: "Greška na serveru: " + err.message });
   }
 });
 
 app.post("/changePass", async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: "Email i nova lozinka su obavezni." });
+  if (!email || !password) 
+    return res.status(400).json({ message: "Email i nova lozinka su obavezni." });
 
   try {
     await auth.updatePassword(email, password);
     return res.status(200).json({ message: "Lozinka uspješno promijenjena." });
   } catch (err) {
-    return res.status(500).json({ error: "Greška na serveru: " + err.message });
+    return res.status(500).json({ message: "Greška na serveru: " + err.message });
   }
 });
 
