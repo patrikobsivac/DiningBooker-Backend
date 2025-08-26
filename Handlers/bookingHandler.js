@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 
 async function getBookingCollection() {
   const db = await connectToDatabase();
-  return db.collection("Rezervacija");
+  return db.collection("Bookings");
 }
 
 export async function fetchAllBooking(req, res) {
@@ -81,10 +81,33 @@ export async function removeBooking(req, res) {
     const collection = await getBookingCollection();
     const deleteResult = await collection.deleteOne({ _id: new ObjectId(id) });
     if (deleteResult.deletedCount === 0) return res.status(404).json({ message: "Rezervacija nije pronađena." });
-
     return res.status(200).json({ message: "Rezervacija je obrisana." });
   } catch (err) {
     return res.status(500).json({ error: "Greška kod brisanja rezervacije: " + err.message });
+  }
+}
+
+export async function updateBookingRating(req, res) {
+  const { id } = req.params;
+  const { rating } = req.body;
+
+  if (!ObjectId.isValid(id)) return res.status(400).json({ message: "Neispravan ID rezervacije." });
+  if (rating === undefined || rating < 0 || rating > 5)
+    return res.status(400).json({ message: "Ocjena mora biti između 0 i 5." });
+
+  try {
+    const collection = await getBookingCollection();
+    const updatedBooking = await collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { rating } },
+      { returnDocument: "after" }
+    );
+
+    if (!updatedBooking.value) return res.status(404).json({ message: "Rezervacija nije pronađena." });
+
+    return res.status(200).json({ message: "Ocjena uspješno ažurirana.", booking: updatedBooking.value });
+  } catch (err) {
+    return res.status(500).json({ error: "Greška kod ažuriranja ocjene: " + err.message });
   }
 }
 
@@ -94,4 +117,5 @@ export const bookingMethods = {
   fetchBookingByGost,
   createBooking,
   removeBooking,
+  updateBookingRating,
 };

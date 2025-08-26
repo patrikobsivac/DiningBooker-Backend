@@ -113,18 +113,21 @@ router.get("/menus", menuMethods.fetchAllMenus);
 router.get("/menus/:id", menuMethods.fetchMenuById);
 router.get("/menus/filter/category", menuMethods.fetchMenusByCategory);
 router.post("/menus", menuMethods.createMenu);
+router.patch("/menus/:id", menuMethods.updateMenu);
 router.delete("/menus/:id", menuMethods.removeMenu);
 
 router.get("/bookings", bookingMethods.fetchAllBooking);
 router.get("/bookings/:id", bookingMethods.fetchBookingById);
 router.get("/bookings/guest/:id", bookingMethods.fetchBookingByGost);
 router.post("/bookings", bookingMethods.createBooking);
+router.put("/bookings/:id/rating", bookingMethods.updateBookingRating);
 router.delete("/bookings/:id", bookingMethods.removeBooking);
 
 router.get("/ratings", rateMethods.fetchAllRatings);
 router.get("/ratings/:id", rateMethods.fetchRatingById);
 router.post("/ratings", rateMethods.createRating);
 router.delete("/ratings/:id", rateMethods.removeRating);
+
 
 app.get("/", (req, res) => {
   res.send("");
