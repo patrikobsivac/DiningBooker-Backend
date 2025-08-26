@@ -107,11 +107,10 @@ export const updateMenu = async (req, res) => {
   }
 };
 
-
 export const menuMethods = {
   fetchAllMenus,
   fetchMenuById,
-  createMenu,
+  createMenus,
   removeMenu,
   updateMenu, 
   fetchMenusByCategory,

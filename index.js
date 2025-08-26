@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import { guestMethods } from "./Handlers/guestHandler.js";
 import { menuMethods } from "./Handlers/menuHandler.js";
 import { bookingMethods } from "./Handlers/bookingHandler.js";
-import { rateMethods } from "./Handlers/ratingHandler.js";
 import { ObjectId } from "mongodb";
 import auth from "./src/auth.js"; 
 import bcrypt from "bcrypt";
@@ -112,7 +111,7 @@ router.delete("/guests/:id", guestMethods.removeGuest);
 router.get("/menus", menuMethods.fetchAllMenus);
 router.get("/menus/:id", menuMethods.fetchMenuById);
 router.get("/menus/filter/category", menuMethods.fetchMenusByCategory);
-router.post("/menus", menuMethods.createMenu);
+router.post("/menus", menuMethods.createMenus);
 router.patch("/menus/:id", menuMethods.updateMenu);
 router.delete("/menus/:id", menuMethods.removeMenu);
 
@@ -123,11 +122,6 @@ router.post("/bookings", bookingMethods.createBooking);
 router.put("/bookings/:id/rating", bookingMethods.updateBookingRating);
 router.delete("/bookings/:id", bookingMethods.removeBooking);
 
-router.get("/ratings", rateMethods.fetchAllRatings);
-router.get("/ratings/:id", rateMethods.fetchRatingById);
-router.post("/ratings", rateMethods.createRating);
-router.delete("/ratings/:id", rateMethods.removeRating);
-
 
 app.get("/", (req, res) => {
   res.send("");
@@ -136,5 +130,5 @@ app.get("/", (req, res) => {
 app.use("/api", router);
 
 app.listen(PORT, () => {
-  console.log(`Servis sluša na portu ${PORT}`);
+  console.log(`Server pokrenut: http://localhost:${PORT}`);
 });
